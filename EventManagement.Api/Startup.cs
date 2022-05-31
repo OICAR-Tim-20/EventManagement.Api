@@ -27,6 +27,7 @@ namespace EventManagement.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddControllers();
             services.AddDbContext<EventManagementContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
             services.AddSwaggerGen();
@@ -45,6 +46,15 @@ namespace EventManagement.Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            //s AllowCredentials možemo poslati cookie na frontend
+
+            //dodajemo react app host
+            app.UseCors(options => options
+            .WithOrigins(new[] {"http://localhost:3000"})
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
 
             app.UseAuthorization();
 

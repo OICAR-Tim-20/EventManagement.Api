@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace EventManagement.Api.Models
 {
@@ -9,8 +10,10 @@ namespace EventManagement.Api.Models
         [Required]
         public string Username { get; set; }
         [Required]
+        [JsonIgnore]
         public byte[] PasswordHash { get; set; }
         [Required]
+        [JsonIgnore]
         public byte[] PasswordSalt { get; set; }
         [Required]
         public string Email { get; set; }

@@ -1,5 +1,6 @@
 ﻿using EventManagement.Api.Models;
 using EventManagement.Api.Models.DTO;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -66,7 +67,37 @@ namespace EventManagement.Api.Controllers
             if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt)) {
                 return BadRequest("Incorrect password.");
             }
-            return Ok(CreateToken(user));
+
+            //ovdje se kreira jwt token i postavlja se u cookie, a response vraća samo poruku.
+            Response.Cookies.Append("jwt", CreateToken(user),new CookieOptions
+            {
+                HttpOnly = true
+            });
+
+            return Ok("Success!");
+        }
+
+        [HttpGet("get_current_user", Name = "GetCurrentUser")]
+        public async Task<ActionResult<User>> GetCurrentUser()
+        {
+            try
+            {
+                var jwt = Request.Cookies["jwt"];
+                var token = VerifyJwt(jwt);
+                string username = token.Claims.First(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name").Value;
+                var user = _context.Users.FirstOrDefault(u => u.Username == username);
+                return Ok(user);
+            }
+            catch (Exception)
+            {
+                return Unauthorized();
+            }
+        }
+
+        [HttpGet("logout")]
+        public async Task<ActionResult<string>> Logout() {
+            Response.Cookies.Delete("jwt");
+            return Ok("User logged out.");
         }
 
         //TODO: ove metode staviti negdje van controllera tipa repository klasu ili nešto drugo
@@ -103,6 +134,22 @@ namespace EventManagement.Api.Controllers
                 return computedHash.SequenceEqual(passwordHash);
 
             }
+        }
+
+        public JwtSecurityToken VerifyJwt(string jwt) {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration.GetSection("AppSettings:Token").Value);
+
+            tokenHandler.ValidateToken(jwt, new TokenValidationParameters { 
+
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = false,
+                ValidateAudience = false
+
+            }, out SecurityToken validatedToken);
+
+            return (JwtSecurityToken)validatedToken;
         }
     }
 }

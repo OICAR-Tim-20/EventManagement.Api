@@ -21,7 +21,6 @@ namespace EventManagement.Api.Models
         public string Picture { get; set; }
         public string ContactName { get; set; }
         public string PhoneNumber { get; set; }
-        public ICollection<Event> Events { get; set; }
         public int? AddressId { get; set; }
         public int UserType { get; set; }
     }

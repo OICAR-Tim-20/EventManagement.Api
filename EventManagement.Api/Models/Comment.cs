@@ -15,8 +15,6 @@ namespace EventManagement.Api.Models
         [Required]
         public DateTime DatePosted { get; set; }
         [Required]
-        public Event Event {get; set;}
-        [Required]
         public int EventId {get; set;}
     }
 }

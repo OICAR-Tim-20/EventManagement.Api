@@ -23,6 +23,6 @@ namespace EventManagement.Api.Models
         public string PhoneNumber { get; set; }
         public ICollection<Event> Events { get; set; }
         public int? AddressId { get; set; }
-        public int UserType { get; set; }
+        public int UserType { get; set; } = 1;
     }
 }

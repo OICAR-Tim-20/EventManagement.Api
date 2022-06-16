@@ -1,13 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace EventManagement.Api.Models
+﻿namespace EventManagement.Api.Models.DTO
 {
-    public class Address
+    public class AddressDTO
     {
         public int AddressId { get; set; }
-        [Required]
         public string City { get; set; }
-        [Required]
         public string ZipCode { get; set; }
         public string Street { get; set; }
         public string HouseNumber { get; set; }

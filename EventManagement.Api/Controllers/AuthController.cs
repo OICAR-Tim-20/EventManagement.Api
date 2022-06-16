@@ -86,6 +86,10 @@ namespace EventManagement.Api.Controllers
                 var token = VerifyJwt(jwt);
                 string username = token.Claims.First(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name").Value;
                 var user = _context.Users.FirstOrDefault(u => u.Username == username);
+                var userAddress = _context.Addresses.Find(user.AddressId);
+                if (userAddress != null) { 
+                    user.Address = userAddress;
+                }
                 return Ok(user);
             }
             catch (Exception)

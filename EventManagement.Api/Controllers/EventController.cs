@@ -80,7 +80,11 @@ namespace EventManagement.Controllers
             }
 
             GetOrCreateLocation(eventDTO, e);
-            GetOrCreateUser(eventDTO, e);
+
+            if (!GetUser(eventDTO, e))
+            {
+                return BadRequest("User not found");
+            }
 
             CreateTickets(eventDTO, e);
             CreateComments(eventDTO, e);
@@ -116,7 +120,11 @@ namespace EventManagement.Controllers
             }
 
             GetOrCreateLocation(eventDTO, e);
-            GetOrCreateUser(eventDTO, e);
+
+            if (!GetUser(eventDTO, e))
+            {
+                return BadRequest("User not found");
+            }
 
             _context.Events.Add(e);
             _context.SaveChanges();
@@ -177,33 +185,16 @@ namespace EventManagement.Controllers
         }
 
 
-        private void GetOrCreateUser(EventDTO eventDTO, Event e)
+        private bool GetUser(EventDTO eventDTO, Event e)
         {
-            //Treba se prebacit na user controller
             List<User> users = _context.Users.Where(x => x.Username == eventDTO.Username).ToList();
             if (users.Count > 0)
             {
                 e.UserId = users[0].UserId;
                 e.User = users[0];
+                return true;
             }
-            else
-            {
-                //placeholder podaci
-                User user = new User
-                {
-                    Username = eventDTO.Username,
-                    Email = "example@mail.com",
-                    PasswordSalt = Convert.FromBase64String("CGYzqeN4plZekNC88Umm1Q=="),
-                    PasswordHash = Convert.FromBase64String("Gt9Yc4AiIvmsC1QQbe2RZsCIqvoYlst2xbz0Fs8aHnw=")
-                };
-                _context.Users.Add(user);
-                _context.SaveChanges();
-
-                users = _context.Users.Where(x => x.Username == eventDTO.Username).ToList();
-
-                e.UserId = users[0].UserId;
-                e.User = users[0];
-            }
+            return false;
         }
 
         private void GetOrCreateLocation(EventDTO eventDTO, Event e)

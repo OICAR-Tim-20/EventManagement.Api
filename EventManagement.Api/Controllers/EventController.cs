@@ -26,13 +26,8 @@ namespace EventManagement.Controllers
         public async Task<ActionResult<IEnumerable<EventDTO>>> GetEvents()
         {
             List<Event> events = await _context.Events.ToListAsync();
-            events.ForEach(x => EventToDTO(x));
-            return Ok(events);
-
-            //memory leak
-            /*return await _context.Events
-                .Select(x => EventToDTO(x))
-                .ToListAsync();*/
+            IEnumerable<EventDTO> eventDTOs = events.Select(x => EventToDTO(x));
+            return Ok(eventDTOs);
         }
 
         // GET: api/Event/ByUser/5
@@ -40,14 +35,8 @@ namespace EventManagement.Controllers
         public async Task<ActionResult<IEnumerable<EventDTO>>> GetEventsByUser(int id)
         {
             List<Event> events = await _context.Events.Where(x => x.UserId == id).ToListAsync();
-            events.ForEach(x => EventToDTO(x));
-            return Ok(events);
-
-            //memory leak
-            /*return await _context.Events
-                .Where(x => x.UserId == id)
-                .Select(x => EventToDTO(x))
-                .ToListAsync();*/
+            IEnumerable<EventDTO> eventDTOs = events.Select(x => EventToDTO(x));
+            return Ok(eventDTOs);
         }
 
         // GET: api/Event/5
@@ -92,8 +81,6 @@ namespace EventManagement.Controllers
 
             GetOrCreateLocation(eventDTO, e);
             GetOrCreateUser(eventDTO, e);
-
-            _context.SaveChanges();
 
             CreateTickets(eventDTO, e);
             CreateComments(eventDTO, e);
@@ -187,19 +174,6 @@ namespace EventManagement.Controllers
             eventDTO.Picture = e.Picture;
             eventDTO.Comments = comments;
             return eventDTO;
-            /*return new EventDTO
-            {
-                Id = e.EventId,
-                Title = e.Title,
-                StartDate = e.StartDate,
-                EndDate = e.EndDate,
-                Location = e.Location,
-                Username = users.First().Username,
-                EventType = Enum.GetName(typeof(EventType), e.EventType),
-                TicketsAvailable = e.TicketsAvailable.Count,
-                Picture = e.Picture,
-                Comments = e.Comments
-            };*/
         }
 
 
@@ -223,6 +197,8 @@ namespace EventManagement.Controllers
                     PasswordHash = Convert.FromBase64String("Gt9Yc4AiIvmsC1QQbe2RZsCIqvoYlst2xbz0Fs8aHnw=")
                 };
                 _context.Users.Add(user);
+                _context.SaveChanges();
+
                 users = _context.Users.Where(x => x.Username == eventDTO.Username).ToList();
 
                 e.UserId = users[0].UserId;

@@ -14,6 +14,6 @@ namespace EventManagement.Api.Models.DTO
         public string EventType { get; set; }
         public int TicketsAvailable { get; set; }
         public string Picture { get; set; }
-        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Comment>? Comments { get; set; }
     }
 }

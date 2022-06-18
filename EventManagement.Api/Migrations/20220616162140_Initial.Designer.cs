@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventManagement.Api.Migrations
 {
     [DbContext(typeof(EventManagementContext))]
-    [Migration("20220610161005_SimplifiedModel")]
-    partial class SimplifiedModel
+    [Migration("20220616162140_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -185,7 +185,7 @@ namespace EventManagement.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TicketId"), 1L, 1);
 
-                    b.Property<int>("ContactId")
+                    b.Property<int?>("ContactId")
                         .HasColumnType("int");
 
                     b.Property<int>("EventId")
@@ -312,9 +312,7 @@ namespace EventManagement.Api.Migrations
                 {
                     b.HasOne("EventManagement.Api.Models.Contact", "TicketOwner")
                         .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ContactId");
 
                     b.HasOne("EventManagement.Api.Models.Event", null)
                         .WithMany("TicketsAvailable")

@@ -79,7 +79,10 @@ namespace EventManagement.Controllers
                 e.EventType = (int)eventType;
             }
 
-            GetOrCreateLocation(eventDTO, e);
+            if (!GetLocation(eventDTO, e))
+            {
+                return BadRequest("Location not found");
+            }
 
             if (!GetUser(eventDTO, e))
             {
@@ -120,7 +123,10 @@ namespace EventManagement.Controllers
                 e.EventType = (int)eventType;
             }
 
-            GetOrCreateLocation(eventDTO, e);
+            if (!GetLocation(eventDTO, e))
+            {
+                return BadRequest("Location not found");
+            }
 
             if (!GetUser(eventDTO, e))
             {
@@ -177,14 +183,13 @@ namespace EventManagement.Controllers
             List<Ticket> tickets = _context.Tickets.Where(x => x.EventId == e.EventId).ToList();
             List<Comment> comments = _context.Comments.Where(x => x.EventId == e.EventId).ToList();
             Location location = _context.Locations.Where(x => x.LocationId == e.LocationId).ToList().First();
-            location.Address = _context.Addresses.Where(a => a.AddressId == location.AddressId).ToList().First();
 
             EventDTO eventDTO = new EventDTO();
             eventDTO.Id = e.EventId;
             eventDTO.Title = e.Title;
             eventDTO.StartDate = e.StartDate;
             eventDTO.EndDate = e.EndDate;
-            eventDTO.Location = location;
+            eventDTO.LocationId = location.LocationId;
             eventDTO.Username = users.First().Username;
             eventDTO.EventType = Enum.GetName(typeof(EventType), e.EventType);
             eventDTO.TicketsAvailable = tickets.Count;
@@ -206,47 +211,16 @@ namespace EventManagement.Controllers
             return false;
         }
 
-        private void GetOrCreateLocation(EventDTO eventDTO, Event e)
+        private bool GetLocation(EventDTO eventDTO, Event e)
         {
-            List<int> locationIdList = _context.Locations.Select(x => x.LocationId).Where(y => y == eventDTO.Location.LocationId).ToList();
-            if (locationIdList.Count > 0)
+            List<Location> locations = _context.Locations.Where(x => x.LocationId == eventDTO.LocationId).ToList();
+            if (locations.Count > 0)
             {
-                e.LocationId = eventDTO.Location.LocationId;
-                e.Location = eventDTO.Location;
-            }
-            else
-            {
-                List<Address> addresses = _context.Addresses.Where(x => x.AddressId == eventDTO.Location.AddressId).ToList();
-                if (addresses.Count == 0)
-                {
-                    Address address = new Address
-                    {
-                        City = eventDTO.Location.Address.City,
-                        HouseNumber = eventDTO.Location.Address.HouseNumber,
-                        Street = eventDTO.Location.Address.Street,
-                        ZipCode = eventDTO.Location.Address.ZipCode
-                    };
-                    _context.Addresses.Add(address);
-                    _context.SaveChanges();
-
-                    addresses = _context.Addresses.Where(x => x.AddressId == address.AddressId).ToList();
-                }
-
-                Location location = new Location
-                {
-                    LocationId = eventDTO.Location.LocationId,
-                    AddressId = addresses[0].AddressId,
-                    Address = addresses[0],
-                    Venue = eventDTO.Location.Venue
-                };
-                _context.Locations.Add(location);
-                _context.SaveChanges();
-
-                List<Location> locations = _context.Locations.Where(x => x.LocationId == location.LocationId).ToList();
-
                 e.LocationId = locations[0].LocationId;
                 e.Location = locations[0];
+                return true;
             }
+            return false;
         }
 
         private void CreateTickets(EventDTO eventDTO, Event e)

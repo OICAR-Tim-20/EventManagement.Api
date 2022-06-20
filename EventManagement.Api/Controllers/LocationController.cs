@@ -25,7 +25,7 @@ namespace EventManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Location>>> GetLocations()
         {
-            List<Location> locations = await _context.Locations.ToListAsync();
+            List<Location> locations = await _context.Locations.Include(l => l.Address).ToListAsync();
             return Ok(locations);
         }
 
@@ -33,7 +33,8 @@ namespace EventManagement.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Location>> GetLocation(int id)
         {
-            var l = await _context.Locations.FindAsync(id);
+            List<Location> locations = await _context.Locations.Include(l => l.Address).ToListAsync();
+            Location l = locations.FirstOrDefault(l => l.LocationId==id);
 
             if (l == null)
             {
@@ -82,7 +83,7 @@ namespace EventManagement.Controllers
         {
             var l = new Location
             {
-                Venue=location.Venue
+                Venue = location.Venue
             };
 
             GetOrCreateAddress(location, l);

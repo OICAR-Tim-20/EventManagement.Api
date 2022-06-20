@@ -35,7 +35,7 @@ namespace EventManagement.Controllers
 
 
 
-            List<User> users = await _context.Users.ToListAsync();
+            List<User> users = await _context.Users.Include(u => u.Address).ToListAsync();
             IEnumerable<UserDTO> userDTOs = users.Select(x => UserToDTO(x));
             return Ok(userDTOs);
         }
@@ -50,8 +50,8 @@ namespace EventManagement.Controllers
             }
 
 
-
-            var u = await _context.Users.FindAsync(id);
+            List<User> users = await _context.Users.Include(u => u.Address).ToListAsync();
+            User u = users.FirstOrDefault(u => u.UserId == id);
 
             if (u == null)
             {

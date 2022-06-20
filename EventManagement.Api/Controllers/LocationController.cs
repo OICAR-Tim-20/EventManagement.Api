@@ -25,7 +25,7 @@ namespace EventManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Location>>> GetLocations()
         {
-            List<Location> locations = await _context.Locations.ToListAsync();
+            List<Location> locations = await _context.Locations.Include(x => x.Address).ToListAsync();
             return Ok(locations);
         }
 

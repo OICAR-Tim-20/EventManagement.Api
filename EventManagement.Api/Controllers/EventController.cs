@@ -112,6 +112,7 @@ namespace EventManagement.Controllers
                 StartDate = eventDTO.StartDate,
                 EndDate = eventDTO.EndDate,
                 Picture = eventDTO.Picture
+                
             };
 
             if (Enum.TryParse(eventDTO.EventType, out EventType eventType))
@@ -127,7 +128,15 @@ namespace EventManagement.Controllers
             }
 
             _context.Events.Add(e);
-            _context.SaveChanges();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.InnerException);
+            }
+            
 
             CreateTickets(eventDTO, e);
             CreateComments(eventDTO, e);

@@ -25,7 +25,7 @@ namespace EventManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EventDTO>>> GetEvents()
         {
-            List<Event> events = await _context.Events.ToListAsync();
+            List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
             IEnumerable<EventDTO> eventDTOs = events.Select(x => EventToDTO(x));
             return Ok(eventDTOs);
         }
@@ -34,7 +34,7 @@ namespace EventManagement.Controllers
         [HttpGet("ByUser/{id}")]
         public async Task<ActionResult<IEnumerable<EventDTO>>> GetEventsByUser(int id)
         {
-            List<Event> events = await _context.Events.Where(x => x.UserId == id).ToListAsync();
+            List<Event> events = await _context.Events.Where(x => x.UserId == id).Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
             IEnumerable<EventDTO> eventDTOs = events.Select(x => EventToDTO(x));
             return Ok(eventDTOs);
         }
@@ -43,7 +43,8 @@ namespace EventManagement.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<EventDTO>> GetEvent(int id)
         {
-            var e = await _context.Events.FindAsync(id);
+            List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
+            Event e = events.FirstOrDefault(e => e.EventId == id);
 
             if (e == null)
             {
@@ -90,7 +91,6 @@ namespace EventManagement.Controllers
             }
 
             CreateTickets(eventDTO, e);
-            CreateComments(eventDTO, e);
 
             try
             {
@@ -145,7 +145,6 @@ namespace EventManagement.Controllers
             
 
             CreateTickets(eventDTO, e);
-            CreateComments(eventDTO, e);
 
             await _context.SaveChangesAsync();
 
@@ -182,13 +181,14 @@ namespace EventManagement.Controllers
             List<User> users = _context.Users.Where(x => x.UserId == e.UserId).ToList();
             List<Ticket> tickets = _context.Tickets.Where(x => x.EventId == e.EventId).ToList();
             List<Comment> comments = _context.Comments.Where(x => x.EventId == e.EventId).ToList();
-            Location location = _context.Locations.Where(x => x.LocationId == e.LocationId).ToList().First();
+            Location location = _context.Locations.Include(l => l.Address).Where(x => x.LocationId == e.LocationId).ToList().First();
 
             EventDTO eventDTO = new EventDTO();
             eventDTO.Id = e.EventId;
             eventDTO.Title = e.Title;
             eventDTO.StartDate = e.StartDate;
             eventDTO.EndDate = e.EndDate;
+            eventDTO.Location = location;
             eventDTO.LocationId = location.LocationId;
             eventDTO.Username = users.First().Username;
             eventDTO.EventType = Enum.GetName(typeof(EventType), e.EventType);
@@ -228,18 +228,13 @@ namespace EventManagement.Controllers
             ICollection<Ticket> ticketsAvailable = new List<Ticket>();
             for (int i = 0; i < eventDTO.TicketsAvailable; i++)
             {
-                ticketsAvailable.Add(new Ticket());
+                ticketsAvailable.Add(new Ticket
+                {
+                    EventId = e.EventId
+                });
             }
-            ticketsAvailable.ToList().ForEach(x => x.EventId = e.EventId);
-            ticketsAvailable.ToList().ForEach(x => _context.Tickets.Add(x));
+            _context.Tickets.AddRange(ticketsAvailable);
             e.TicketsAvailable = ticketsAvailable;
-        }
-
-        private void CreateComments(EventDTO eventDTO, Event e)
-        {
-            eventDTO.Comments.ToList().ForEach(x => x.EventId = e.EventId);
-            eventDTO.Comments.ToList().ForEach(x => _context.Comments.Add(x));
-            e.Comments = eventDTO.Comments.ToList();
         }
     }
 }

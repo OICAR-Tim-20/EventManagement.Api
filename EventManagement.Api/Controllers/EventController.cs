@@ -30,6 +30,29 @@ namespace EventManagement.Controllers
             return Ok(eventDTOs);
         }
 
+        // GET: api/Event/ByDateAll
+        [HttpGet("ByDateAll")]
+        public async Task<ActionResult<IEnumerable<EventBlockDTO>>> GetEventsByDateAll()
+        {
+            List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
+            List<EventBlockDTO> eventBlockDTOs = new List<EventBlockDTO>();
+            List<DateTime> dateTimes = new List<DateTime>();
+            foreach (var e in events)
+            {
+                if (!dateTimes.Any(dt => dt.Date == e.StartDate.Date))
+                {
+                    dateTimes.Add(e.StartDate);
+
+                    eventBlockDTOs.Add(new EventBlockDTO
+                    {
+                        Date = e.StartDate.Date,
+                        EventDTOs = new List<EventDTO>(events.Where(x => x.StartDate.Date == e.StartDate.Date).Select(x => EventToDTO(x)))
+                    });
+                }
+            }
+            return Ok(eventBlockDTOs);
+        }
+
         // GET: api/Event/ByUser/5
         [HttpGet("ByUser/{id}")]
         public async Task<ActionResult<IEnumerable<EventDTO>>> GetEventsByUser(int id)
@@ -47,8 +70,8 @@ namespace EventManagement.Controllers
             List<Event> events = await _context.Events.Where(x => x.StartDate.Date == dateUtc.Date).Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
             EventBlockDTO eventBlockDTO = new EventBlockDTO
             {
-                Date = dateUtc,
-                EventDTOs=new List<EventDTO>(events.Select(x => EventToDTO(x)))
+                Date = dateUtc.Date,
+                EventDTOs = new List<EventDTO>(events.Select(x => EventToDTO(x)))
             };
             return Ok(eventBlockDTO);
         }

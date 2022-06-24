@@ -39,6 +39,20 @@ namespace EventManagement.Controllers
             return Ok(eventDTOs);
         }
 
+        // GET: api/Event/ByDate/2001-01-01T09:09:17.490Z
+        [HttpGet("ByDate/{date}")]
+        public async Task<ActionResult<IEnumerable<EventBlockDTO>>> GetEventsByDate(string date)
+        {
+            DateTime.TryParse(date, out DateTime dateUtc);
+            List<Event> events = await _context.Events.Where(x => x.StartDate.Date == dateUtc.Date).Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
+            EventBlockDTO eventBlockDTO = new EventBlockDTO
+            {
+                Date = dateUtc,
+                EventDTOs=new List<EventDTO>(events.Select(x => EventToDTO(x)))
+            };
+            return Ok(eventBlockDTO);
+        }
+
         // GET: api/Event/5
         [HttpGet("{id}")]
         public async Task<ActionResult<EventDTO>> GetEvent(int id)
@@ -188,7 +202,6 @@ namespace EventManagement.Controllers
             eventDTO.Comments = comments;
             return eventDTO;
         }
-
 
         private bool GetUser(EventDTO eventDTO, Event e)
         {

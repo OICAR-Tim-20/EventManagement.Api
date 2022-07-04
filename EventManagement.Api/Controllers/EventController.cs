@@ -257,7 +257,8 @@ namespace EventManagement.Controllers
             {
                 ticketsAvailable.Add(new Ticket
                 {
-                    EventId = e.EventId
+                    EventId = e.EventId,
+                    Purchased = false
                 });
             }
             _context.Tickets.AddRange(ticketsAvailable);

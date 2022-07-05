@@ -16,6 +16,7 @@ namespace EventManagement.Api.Models
         public bool PrintableToPdf { get; set; } = false;
         public int EventId { get; set; }
         public int? ContactId { get; set; }
+        public bool Purchased { get; set; }
 
     }
 }

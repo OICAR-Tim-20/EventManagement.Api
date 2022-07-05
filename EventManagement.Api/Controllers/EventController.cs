@@ -30,6 +30,29 @@ namespace EventManagement.Controllers
             return Ok(eventDTOs);
         }
 
+        // GET: api/Event/ByDateAll
+        [HttpGet("ByDateAll")]
+        public async Task<ActionResult<IEnumerable<EventBlockDTO>>> GetEventsByDateAll()
+        {
+            List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
+            List<EventBlockDTO> eventBlockDTOs = new List<EventBlockDTO>();
+            List<DateTime> dateTimes = new List<DateTime>();
+            foreach (var e in events)
+            {
+                if (!dateTimes.Any(dt => dt.Date == e.StartDate.Date))
+                {
+                    dateTimes.Add(e.StartDate);
+
+                    eventBlockDTOs.Add(new EventBlockDTO
+                    {
+                        Date = e.StartDate.Date,
+                        EventDTOs = new List<EventDTO>(events.Where(x => x.StartDate.Date == e.StartDate.Date).Select(x => EventToDTO(x)))
+                    });
+                }
+            }
+            return Ok(eventBlockDTOs);
+        }
+
         // GET: api/Event/ByUser/5
         [HttpGet("ByUser/{id}")]
         public async Task<ActionResult<IEnumerable<EventDTO>>> GetEventsByUser(int id)
@@ -37,6 +60,20 @@ namespace EventManagement.Controllers
             List<Event> events = await _context.Events.Where(x => x.UserId == id).Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
             IEnumerable<EventDTO> eventDTOs = events.Select(x => EventToDTO(x));
             return Ok(eventDTOs);
+        }
+
+        // GET: api/Event/ByDate/2001-01-01T09:09:17.490Z
+        [HttpGet("ByDate/{date}")]
+        public async Task<ActionResult<IEnumerable<EventBlockDTO>>> GetEventsByDate(string date)
+        {
+            DateTime.TryParse(date, out DateTime dateUtc);
+            List<Event> events = await _context.Events.Where(x => x.StartDate.Date == dateUtc.Date).Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
+            EventBlockDTO eventBlockDTO = new EventBlockDTO
+            {
+                Date = dateUtc.Date,
+                EventDTOs = new List<EventDTO>(events.Select(x => EventToDTO(x)))
+            };
+            return Ok(eventBlockDTO);
         }
 
         // GET: api/Event/5
@@ -192,12 +229,11 @@ namespace EventManagement.Controllers
             eventDTO.LocationId = location.LocationId;
             eventDTO.Username = users.First().Username;
             eventDTO.EventType = Enum.GetName(typeof(EventType), e.EventType);
-            eventDTO.TicketsAvailable = tickets.Count;
+            eventDTO.TicketsAvailable = tickets.Where(t => t.Purchased == false).Count();
             eventDTO.Picture = e.Picture;
             eventDTO.Comments = comments;
             return eventDTO;
         }
-
 
         private bool GetUser(EventDTO eventDTO, Event e)
         {
@@ -230,7 +266,8 @@ namespace EventManagement.Controllers
             {
                 ticketsAvailable.Add(new Ticket
                 {
-                    EventId = e.EventId
+                    EventId = e.EventId,
+                    Purchased = false
                 });
             }
             _context.Tickets.AddRange(ticketsAvailable);

@@ -220,7 +220,7 @@ namespace EventManagement.Controllers
             eventDTO.LocationId = location.LocationId;
             eventDTO.Username = users.First().Username;
             eventDTO.EventType = Enum.GetName(typeof(EventType), e.EventType);
-            eventDTO.TicketsAvailable = tickets.Count;
+            eventDTO.TicketsAvailable = tickets.Where(t => t.Purchased == false).Count();
             eventDTO.Picture = e.Picture;
             eventDTO.Comments = comments;
             return eventDTO;

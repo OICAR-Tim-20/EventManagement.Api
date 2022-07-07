@@ -91,10 +91,11 @@ namespace EventManagement.Controllers
             _context.Locations.Add(l);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetLocation),
-                new { id = l.LocationId },
-                l);
+            //return CreatedAtAction(
+            //    nameof(GetLocation),
+            //    new { id = l.LocationId },
+            //    l);
+            return Ok("Location Created!");
         }
 
         // DELETE: api/Location/5

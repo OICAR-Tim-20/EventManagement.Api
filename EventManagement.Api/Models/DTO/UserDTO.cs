@@ -10,5 +10,6 @@
         public string? Picture { get; set; } = null;
         public string ContactName { get; set; }
         public string PhoneNumber { get; set; }
+        public int UserType { get; set; }
     }
 }

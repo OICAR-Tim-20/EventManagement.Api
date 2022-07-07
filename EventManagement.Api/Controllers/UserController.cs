@@ -187,6 +187,7 @@ namespace EventManagement.Controllers
             userDTO.Picture = user.Picture;
             userDTO.ContactName = user.ContactName;
             userDTO.PhoneNumber = user.PhoneNumber;
+            userDTO.UserType = user.UserType;
 
             return userDTO;
         }

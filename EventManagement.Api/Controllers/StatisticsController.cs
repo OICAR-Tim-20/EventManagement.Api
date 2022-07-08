@@ -66,20 +66,9 @@ namespace EventManagement.Controllers
         public async Task<ActionResult<double>> GetAverageEventRating()
         {
             List<Comment> comments = await _context.Comments.ToListAsync();
-            List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
             ILookup<int, int> commentRatingsByEventId = comments.ToLookup(c => c.EventId, c => c.Rating);
 
-            Event selectedEvent = null;
-            List<int> totalEventRatings = new List<int>();
-            foreach (var item in commentRatingsByEventId)
-            {
-                if (selectedEvent == null || selectedEvent.EventId != item.Key)
-                {
-                    selectedEvent = events.FirstOrDefault(e => e.EventId == item.Key);
-                }
-                totalEventRatings.AddRange(item);
-            }
-            return Ok(totalEventRatings.Average());
+            return Ok(comments.Average(c => c.Rating));
         }
 
         // GET: api/Statistics/TopRatedEvent
@@ -90,23 +79,12 @@ namespace EventManagement.Controllers
             List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
             ILookup<int, int> commentRatingsByEventId = comments.ToLookup(c => c.EventId, c => c.Rating);
 
-            Event selectedEvent = null;
-            Event topRatedEvent = null;
-            double maxRating = 0;
-            foreach (var item in commentRatingsByEventId)
-            {
-                if (selectedEvent == null || selectedEvent.EventId != item.Key)
-                {
-                    selectedEvent = events.FirstOrDefault(e => e.EventId == item.Key);
-                }
+            IOrderedEnumerable<IGrouping<int, int>> orderedCommentRatingsByEventId = commentRatingsByEventId.OrderByDescending(t => t.Average());
 
-                if (maxRating < item.Average())
-                {
-                    maxRating = item.Average();
-                    topRatedEvent = selectedEvent;
-                }
-            }
-            return Ok(new KeyValuePair<double, EventDTO>(maxRating, EventToDTO(topRatedEvent)));
+            IGrouping<int, int> grouping = orderedCommentRatingsByEventId.ElementAt(0);
+            EventDTO eventDTO = EventToDTO(events.FirstOrDefault(e => e.EventId == grouping.Key));
+
+            return Ok(new KeyValuePair<double, EventDTO>(grouping.Average(), eventDTO));
         }
 
         // GET: api/Statistics/MostCommentedEvent
@@ -117,23 +95,12 @@ namespace EventManagement.Controllers
             List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
             ILookup<int, Comment> commentsByEventId = comments.ToLookup(c => c.EventId);
 
-            Event selectedEvent = null;
-            Event mostCommentedEvent = null;
-            int mostComments = 0;
-            foreach (var item in commentsByEventId)
-            {
-                if (selectedEvent == null || selectedEvent.EventId != item.Key)
-                {
-                    selectedEvent = events.FirstOrDefault(e => e.EventId == item.Key);
-                }
+            IOrderedEnumerable<IGrouping<int, Comment>> orderedCommentsByEventId = commentsByEventId.OrderByDescending(t => t.Count());
 
-                if (mostComments < item.Count())
-                {
-                    mostComments = item.Count();
-                    mostCommentedEvent = selectedEvent;
-                }
-            }
-            return Ok(new KeyValuePair<int, EventDTO>(mostComments, EventToDTO(mostCommentedEvent)));
+            IGrouping<int, Comment> grouping = orderedCommentsByEventId.ElementAt(0);
+            EventDTO eventDTO = EventToDTO(events.FirstOrDefault(e => e.EventId == grouping.Key));
+
+            return Ok(new KeyValuePair<int, EventDTO>(grouping.Count(), eventDTO));
         }
 
         // GET: api/Statistics/BestSellingEvent
@@ -144,23 +111,79 @@ namespace EventManagement.Controllers
             List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
             ILookup<int, Ticket> ticketsByEventId = tickets.Where(t => t.Purchased == true).ToLookup(c => c.EventId);
 
-            Event selectedEvent = null;
-            Event bestSellingEvent = null;
-            int mostSoldTickets = 0;
-            foreach (var item in ticketsByEventId)
+            IOrderedEnumerable<IGrouping<int, Ticket>> orderedTicketsByEventId = ticketsByEventId.OrderByDescending(t => t.Count());
+
+            IGrouping<int, Ticket> grouping = orderedTicketsByEventId.ElementAt(0);
+            EventDTO eventDTO = EventToDTO(events.FirstOrDefault(e => e.EventId == grouping.Key));
+
+            return Ok(new KeyValuePair<int, EventDTO>(grouping.Count(), eventDTO));
+        }
+
+        // GET: api/Statistics/BestSellingEvent/3
+        [HttpGet("BestSellingEvent/{amount}")]
+        public async Task<ActionResult<List<KeyValuePair<int, EventDTO>>>> GetBestSellingEvents(int amount)
+        {
+            if (amount > 3)
             {
-                if (selectedEvent == null || selectedEvent.EventId != item.Key)
+                return BadRequest();
+            }
+
+            List<Ticket> tickets = await _context.Tickets.ToListAsync();
+            List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
+            ILookup<int, Ticket> ticketsByEventId = tickets.Where(t => t.Purchased == true).ToLookup(c => c.EventId);
+
+            IOrderedEnumerable<IGrouping<int, Ticket>> orderedTicketsByEventId = ticketsByEventId.OrderByDescending(t => t.Count());
+            List<KeyValuePair<int, EventDTO>> bestSellingEventsKeyValuePairs = new List<KeyValuePair<int, EventDTO>>();
+
+            for (int i = 0; i < amount; i++)
+            {
+                IGrouping<int, Ticket> grouping = orderedTicketsByEventId.ElementAt(i);
+                EventDTO eventDTO = EventToDTO(events.FirstOrDefault(e => e.EventId == grouping.Key));
+                bestSellingEventsKeyValuePairs.Add((new KeyValuePair<int, EventDTO>(grouping.Count(), eventDTO)));
+            }
+
+            return Ok(bestSellingEventsKeyValuePairs);
+        }
+
+        [HttpGet("PercentageOfTicketsSoldByEventType")]
+        public async Task<ActionResult<IDictionary<string, double>>> PercentageOfTicketsSoldByEventType()
+        {
+            List<Event> events = await _context.Events.Include(e => e.Location).ThenInclude(l => l.Address).ToListAsync();
+            List<Ticket> purchasedTickets = await _context.Tickets.Where(t => t.Purchased == true).ToListAsync();
+
+            ILookup<int, string> eventTypesByEventIdLookup = events.ToLookup(e => e.EventId, e => Enum.GetName(typeof(EventType), e.EventType));
+            IEnumerable<KeyValuePair<string, Ticket>> ticketsByEventType = purchasedTickets.Join(eventTypesByEventIdLookup,
+                                 pt => pt.EventId,
+                                 et => et.Key,
+                                 (pt, et) => new KeyValuePair<string, Ticket>(et.FirstOrDefault(), pt));
+            IOrderedEnumerable<KeyValuePair<string, Ticket>> orderedTicketsByEventType = ticketsByEventType.OrderBy(tbyt => tbyt.Key);
+
+            Dictionary<string, double> purchasedTicketsByEventType = new Dictionary<string, double>();
+            string selectedEventType = null;
+            int count = 0;
+            foreach (var item in orderedTicketsByEventType)
+            {
+                if (selectedEventType == null || selectedEventType != item.Key)
                 {
-                    selectedEvent = events.FirstOrDefault(e => e.EventId == item.Key);
+                    selectedEventType = item.Key;
+
+                    count = 0;
+                    purchasedTicketsByEventType.Add(selectedEventType, 0);
                 }
 
-                if (mostSoldTickets < item.Count())
-                {
-                    mostSoldTickets = item.Count();
-                    bestSellingEvent = selectedEvent;
-                }
+                purchasedTicketsByEventType[selectedEventType] += 1;
+                count++;
             }
-            return Ok(new KeyValuePair<int, EventDTO>(mostSoldTickets, EventToDTO(bestSellingEvent)));
+
+            purchasedTicketsByEventType.OrderBy(x => x.Value);
+
+            double sum = purchasedTicketsByEventType.Values.Sum();
+            foreach (var item in purchasedTicketsByEventType.Keys)
+            {
+                purchasedTicketsByEventType[item] /= sum;
+            }
+
+            return Ok(purchasedTicketsByEventType);
         }
 
         // GET: api/Statistics/UserWithMostEvents
@@ -171,23 +194,12 @@ namespace EventManagement.Controllers
             List<User> users = await _context.Users.Include(u => u.Address).ToListAsync();
             ILookup<User, Event> eventsByUser = events.ToLookup(e => e.User);
 
-            User selectedUser = null;
-            User userWithMostEvents = null;
-            int mostEvents = 0;
-            foreach (var item in eventsByUser)
-            {
-                if (selectedUser == null || selectedUser.UserId != item.Key.UserId)
-                {
-                    selectedUser = users.FirstOrDefault(u => u.UserId == item.Key.UserId);
-                }
+            IOrderedEnumerable<IGrouping<User, Event>> orderedEventsByUser = eventsByUser.OrderByDescending(e => e.Count());
 
-                if (mostEvents < item.Count())
-                {
-                    mostEvents = item.Count();
-                    userWithMostEvents = selectedUser;
-                }
-            }
-            return Ok(new KeyValuePair<int, UserDTO>(mostEvents, UserToDTO(userWithMostEvents)));
+            IGrouping<User, Event> grouping = orderedEventsByUser.ElementAt(0);
+            UserDTO userDTO = UserToDTO(users.FirstOrDefault(u => u.UserId == grouping.Key.UserId));
+
+            return Ok(new KeyValuePair<int, UserDTO>(grouping.Count(), userDTO));
         }
 
         // GET: api/Statistics/UserWithMostSoldTickets
@@ -199,15 +211,20 @@ namespace EventManagement.Controllers
             List<User> users = await _context.Users.Include(u => u.Address).ToListAsync();
             ILookup<User, Event> eventsByUser = events.ToLookup(e => e.User);
 
+            List<KeyValuePair<int, User>> usersBySoldTicketsTemp = new List<KeyValuePair<int, User>>();
+            List<KeyValuePair<int, User>> usersBySoldTickets = new List<KeyValuePair<int, User>>();
             User selectedUser = null;
-            User userWithMostTickets = null;
-            int totalTickets = 0;
-            int mostSoldTickets = 0;
+            int sum = 0;
             foreach (var item in eventsByUser)
             {
+                if (selectedUser != null && selectedUser.UserId != item.Key.UserId)
+                {
+                    sum = usersBySoldTicketsTemp.Where(kvp => kvp.Value.UserId == selectedUser.UserId).Sum(kvp => kvp.Key);
+                    usersBySoldTickets.Add(new KeyValuePair<int, User>(sum, selectedUser));
+                }
+
                 if (selectedUser == null || selectedUser.UserId != item.Key.UserId)
                 {
-                    totalTickets = 0;
                     selectedUser = users.FirstOrDefault(u => u.UserId == item.Key.UserId);
                 }
 
@@ -216,15 +233,15 @@ namespace EventManagement.Controllers
                                  e => e.EventId,
                                  (t, e) => t);
 
-                totalTickets += purchasedTicketsFromEvent.Count();
-
-                if (mostSoldTickets < totalTickets)
-                {
-                    mostSoldTickets = totalTickets;
-                    userWithMostTickets = selectedUser;
-                }
+                usersBySoldTicketsTemp.Add(new KeyValuePair<int, User>(purchasedTicketsFromEvent.Count(), selectedUser));
             }
-            return Ok(new KeyValuePair<int, UserDTO>(mostSoldTickets, UserToDTO(userWithMostTickets)));
+
+            sum = usersBySoldTicketsTemp.Where(kvp => kvp.Value.UserId == selectedUser.UserId).Sum(kvp => kvp.Key);
+            usersBySoldTickets.Add(new KeyValuePair<int, User>(sum, selectedUser));
+
+            KeyValuePair<int, User> keyValuePair = usersBySoldTickets.MaxBy(u => u.Key);
+
+            return Ok(new KeyValuePair<int, UserDTO>(keyValuePair.Key, UserToDTO(keyValuePair.Value)));
         }
 
         private EventDTO EventToDTO(Event e)
@@ -259,6 +276,7 @@ namespace EventManagement.Controllers
             userDTO.Picture = user.Picture;
             userDTO.ContactName = user.ContactName;
             userDTO.PhoneNumber = user.PhoneNumber;
+            userDTO.UserType = user.UserType;
 
             return userDTO;
         }

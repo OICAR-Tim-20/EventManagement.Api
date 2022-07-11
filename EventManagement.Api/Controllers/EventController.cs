@@ -180,15 +180,11 @@ namespace EventManagement.Controllers
                 return BadRequest(ex.InnerException);
             }
             
-
             CreateTickets(eventDTO, e);
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetEvent),
-                new { id = e.EventId },
-                EventToDTO(e));
+            return Ok("Event created!");
         }
 
         // DELETE: api/Event/5

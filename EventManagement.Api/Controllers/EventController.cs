@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Api.Models;
 using EventManagement.Api.Models.DTO;
+using EmailService;
 
 namespace EventManagement.Controllers
 {
@@ -15,10 +16,12 @@ namespace EventManagement.Controllers
     public class EventController : ControllerBase
     {
         private readonly EventManagementContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public EventController(EventManagementContext context)
+        public EventController(EventManagementContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
         }
 
         // GET: api/Event
@@ -152,7 +155,7 @@ namespace EventManagement.Controllers
                 StartDate = eventDTO.StartDate,
                 EndDate = eventDTO.EndDate,
                 Picture = eventDTO.Picture
-                
+
             };
 
             if (Enum.TryParse(eventDTO.EventType, out EventType eventType))
@@ -179,7 +182,7 @@ namespace EventManagement.Controllers
             {
                 return BadRequest(ex.InnerException);
             }
-            
+
             CreateTickets(eventDTO, e);
 
             await _context.SaveChangesAsync();
@@ -196,6 +199,23 @@ namespace EventManagement.Controllers
             if (e == null)
             {
                 return NotFound();
+            }
+
+            List<Ticket> tickets = await _context.Tickets.Include(t => t.TicketOwner).ToListAsync();
+            tickets.FirstOrDefault(t => t.EventId == e.EventId);
+
+            List<string> emails = new List<string>();
+            foreach (Ticket t in tickets)
+            {
+                if (t.TicketOwner != null)
+                {
+                    emails.Add(t.TicketOwner.Email);
+                }
+            }
+            foreach (var email in emails)
+            {
+                var message = new Message(new string[] { email }, "Cancelled event", $"The event \"{e.Title}\" you purchased tickets for has been cancelled. Please contact support for refunds.");
+                _emailSender.SendEmail(message);
             }
 
             _context.Events.Remove(e);
@@ -263,10 +283,13 @@ namespace EventManagement.Controllers
                 ticketsAvailable.Add(new Ticket
                 {
                     EventId = e.EventId,
-                    Purchased = false
+                    Purchased = false,
+                    PrintableToPdf = true
                 });
             }
             _context.Tickets.AddRange(ticketsAvailable);
+            _context.SaveChanges();
+
             e.TicketsAvailable = ticketsAvailable;
         }
     }

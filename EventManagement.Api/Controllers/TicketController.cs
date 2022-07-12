@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Api.Models;
 using EventManagement.Api.Models.DTO;
+using EmailService;
 
 namespace EventManagement.Controllers
 {
@@ -15,10 +16,12 @@ namespace EventManagement.Controllers
     public class TicketController : ControllerBase
     {
         private readonly EventManagementContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public TicketController(EventManagementContext context)
+        public TicketController(EventManagementContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
         }
 
         // GET: api/Ticket
@@ -89,17 +92,26 @@ namespace EventManagement.Controllers
             return NoContent();
         }
 
-        // PUT: api/Ticket/Purchase/5
+        // PUT: api/Ticket/Purchase/5/example@gmail.com
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("Purchase/{id}")]
-        public async Task<IActionResult> UpdateTicketToPurchased(int id)
+        [HttpPut("Purchase/{id}/{email}")]
+        public async Task<IActionResult> UpdateTicketToPurchased(int id, string email)
         {
-            var t = await _context.Tickets.FindAsync(id);
+            List<Ticket> tickets = await _context.Tickets.ToListAsync();
+            Ticket t = tickets.FirstOrDefault(t => t.Purchased == false && t.EventId == id);
+
             if (t == null)
             {
-                return NotFound();
+                return BadRequest("No available tickets for specified event!");
             }
 
+            List<Event> events = await _context.Events.ToListAsync();
+            Event e = events.FirstOrDefault(e => e.EventId == id);
+
+            var message = new Message(new string[] { email }, "Your ticket", $"You have purchased a ticket for \"{e.Title}\" starting at {e.StartDate}.");
+            _emailSender.SendEmail(message);
+
+            CreateContact(email, t);
             t.Purchased = true;
 
             try
@@ -170,6 +182,21 @@ namespace EventManagement.Controllers
                 t.ContactId = contacts[0].ContactId;
                 t.TicketOwner = contacts[0];
             }
+        }
+
+        private void CreateContact(string email, Ticket t)
+        {
+            var c = new Contact
+            {
+                FirstName = "FirstName",
+                LastName = "LastName",
+                Email = email
+            };
+
+            _context.Contacts.Add(c);
+            _context.SaveChanges();
+
+            t.ContactId = c.ContactId;
         }
     }
 }

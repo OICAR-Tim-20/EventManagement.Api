@@ -1,3 +1,4 @@
+using EmailService;
 using EventManagement.Api.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,6 +28,13 @@ namespace EventManagement.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var emailConfig = Configuration
+                .GetSection("EmailConfiguration")
+                .Get<EmailConfiguration>();
+            services.AddSingleton(emailConfig);
+
+            services.AddScoped<IEmailSender, EmailSender>();
+
             services.AddCors();
             services.AddControllers();
             services.AddDbContext<EventManagementContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
@@ -51,7 +59,7 @@ namespace EventManagement.Api
 
             //dodajemo react app host
             app.UseCors(options => options
-            .WithOrigins(new[] {"http://localhost:3000"})
+            .WithOrigins(new[] { "http://localhost:3000" })
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());

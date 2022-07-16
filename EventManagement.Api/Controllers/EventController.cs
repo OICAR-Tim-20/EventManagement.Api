@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using EventManagement.Api.Models;
 using EventManagement.Api.Models.DTO;
 using EmailService;
+using QRCoder;
 
 namespace EventManagement.Controllers
 {
@@ -291,7 +292,23 @@ namespace EventManagement.Controllers
             _context.Tickets.AddRange(ticketsAvailable);
             _context.SaveChanges();
 
+            foreach (var t in ticketsAvailable)
+            {
+                t.QRCode = GenerateQRCode(t.TicketId);
+            }
+
+            _context.SaveChanges();
+
             e.TicketsAvailable = ticketsAvailable;
+        }
+
+        private string GenerateQRCode(int id)
+        {
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode($"{id}", QRCodeGenerator.ECCLevel.Q);
+            Base64QRCode qrCode = new Base64QRCode(qrCodeData);
+            string qrCodeImageAsBase64 = qrCode.GetGraphic(20);
+            return qrCodeImageAsBase64;
         }
     }
 }

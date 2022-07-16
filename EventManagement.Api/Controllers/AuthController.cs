@@ -46,8 +46,7 @@ namespace EventManagement.Api.Controllers
             //TODO: operacije sa entity frameworkom ubaciti try-catch block i vratiti bad request(400) ukoliko se radi o grešci
             _context.Users.Add(user);
             _context.SaveChanges();
-            return Ok(user);
-
+            return Ok("User successfully registered!");
         }
 
         //TODO: fixati Isusove warninge

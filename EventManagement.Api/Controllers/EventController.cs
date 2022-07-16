@@ -135,6 +135,7 @@ namespace EventManagement.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok("Event Updated!");
             }
             catch (DbUpdateConcurrencyException) when (!EventExists(id))
             {

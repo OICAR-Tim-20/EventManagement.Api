@@ -136,14 +136,13 @@ namespace EventManagement.Controllers
             try
             {
                 await _context.SaveChangesAsync();
-                return Ok("Event Updated!");
             }
             catch (DbUpdateConcurrencyException) when (!EventExists(id))
             {
                 return NotFound();
             }
 
-            return NoContent();
+            return Ok("Event updated!");
         }
 
         // POST: api/Event

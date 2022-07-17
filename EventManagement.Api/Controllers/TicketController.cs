@@ -108,8 +108,8 @@ namespace EventManagement.Controllers
             List<Event> events = await _context.Events.ToListAsync();
             Event e = events.FirstOrDefault(e => e.EventId == id);
 
-            var message = new Message(new string[] { email }, "Your ticket", $"You have purchased a ticket for \"{e.Title}\" starting at {e.StartDate}.");
-            _emailSender.SendEmail(message);
+            /*var message = new Message(new string[] { email }, "Your ticket", $"You have purchased a ticket for \"{e.Title}\" starting at {e.StartDate}.");
+            _emailSender.SendEmail(message);*/
 
             CreateContact(email, t);
             t.Purchased = true;

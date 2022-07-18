@@ -83,12 +83,7 @@ namespace EventManagement.Controllers
             u.ContactName = userDTO.ContactName;
             u.PhoneNumber = userDTO.PhoneNumber;
 
-            u.PasswordHash = Encoding.UTF8.GetBytes(getHash(userDTO.Password));
-            u.PasswordSalt = Encoding.UTF8.GetBytes(getSalt());
-
             GetOrCreateAddress(userDTO, u);
-
-
 
             _context.Entry(u).State = EntityState.Modified;
 
@@ -134,8 +129,9 @@ namespace EventManagement.Controllers
                 PhoneNumber = userDTO.PhoneNumber
             };
 
-            u.PasswordHash = Encoding.UTF8.GetBytes(getHash(userDTO.Password));
-            u.PasswordSalt = Encoding.UTF8.GetBytes(getSalt());
+            //u.PasswordHash = Encoding.UTF8.GetBytes(getHash(userDTO.Password));
+            //u.PasswordSalt = Encoding.UTF8.GetBytes(getSalt());
+            u.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
 
             GetOrCreateAddress(userDTO, u);
 
@@ -190,25 +186,6 @@ namespace EventManagement.Controllers
             userDTO.UserType = user.UserType;
 
             return userDTO;
-        }
-
-        private static string getHash(string text)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
-                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
-            }
-        }
-
-        private static string getSalt()
-        {
-            byte[] bytes = new byte[128 / 8];
-            using (var keyGenerator = RandomNumberGenerator.Create())
-            {
-                keyGenerator.GetBytes(bytes);
-                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
-            }
         }
 
         private void GetOrCreateAddress(UserDTO userDTO, User u)

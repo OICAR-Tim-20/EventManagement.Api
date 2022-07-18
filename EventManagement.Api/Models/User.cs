@@ -11,10 +11,7 @@ namespace EventManagement.Api.Models
         public string Username { get; set; }
         [Required]
         [JsonIgnore]
-        public byte[] PasswordHash { get; set; }
-        [Required]
-        [JsonIgnore]
-        public byte[] PasswordSalt { get; set; }
+        public string PasswordHash { get; set; }
         [Required]
         public string Email { get; set; }
         public Address Address { get; set; }

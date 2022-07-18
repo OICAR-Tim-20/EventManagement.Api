@@ -32,14 +32,13 @@ namespace EventManagement.Api.Controllers
         [HttpPost("register", Name = "Register")]
         public async Task<ActionResult<User>> Register([FromBody] UserDTO request) {
             //TODO: dovršiti registraciju -> Doraditi DTO objekt, i iz DTO objekta pospremiti sve u User objekt
-            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            CreatePasswordHash(request.Password, out string passwordHash);
             User user = new();
             //TODO: dakle provjera da li postoji isti user sa istim usernameom ili emailom(mislim da bi te vrijednosti trebale biti unikatne.)
             //TODO: dodati u usera sve potrebne informacije: adresa, itd
             user.Username = request.Username;
             user.Email = request.Email;
             user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
 
             //context objekt s kojim se pristupa bazi
 
@@ -63,7 +62,7 @@ namespace EventManagement.Api.Controllers
             if (user.Username != request.Username) {
                 return BadRequest("User with that username does not exist.");
             }
-            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt)) {
+            if (!VerifyPasswordHash(request.Password, user.PasswordHash)) {
                 return BadRequest("Incorrect password.");
             }
 
@@ -122,21 +121,23 @@ namespace EventManagement.Api.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt) {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            }
+        private void CreatePasswordHash(string password, out string passwordHash) {
+            //using (var hmac = new HMACSHA512())
+            //{
+            //    passwordSalt = hmac.Key;
+            //    passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            //}
+            passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
         }
 
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt) {
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(passwordHash);
+        private bool VerifyPasswordHash(string password, string passwordHash) {
+            //using (var hmac = new HMACSHA512(passwordSalt))
+            //{
+            //    var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            //    return computedHash.SequenceEqual(passwordHash);
 
-            }
+            //}
+            return BCrypt.Net.BCrypt.Verify(password, passwordHash);
         }
 
         public JwtSecurityToken VerifyJwt(string jwt) {

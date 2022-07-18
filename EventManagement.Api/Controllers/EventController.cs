@@ -285,7 +285,8 @@ namespace EventManagement.Controllers
                 {
                     EventId = e.EventId,
                     Purchased = false,
-                    PrintableToPdf = true
+                    PrintableToPdf = true,
+                    Price = eventDTO.TicketPrice
                 });
             }
             _context.Tickets.AddRange(ticketsAvailable);

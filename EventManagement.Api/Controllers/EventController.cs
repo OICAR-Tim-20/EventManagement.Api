@@ -205,7 +205,7 @@ namespace EventManagement.Controllers
             List<Ticket> tickets = await _context.Tickets.Include(t => t.TicketOwner).ToListAsync();
             tickets.FirstOrDefault(t => t.EventId == e.EventId);
 
-            List<string> emails = new List<string>();
+            /*List<string> emails = new List<string>();
             foreach (Ticket t in tickets)
             {
                 if (t.TicketOwner != null)
@@ -217,7 +217,7 @@ namespace EventManagement.Controllers
             {
                 var message = new Message(new string[] { email }, "Cancelled event", $"The event \"{e.Title}\" you purchased tickets for has been cancelled. Please contact support for refunds.");
                 _emailSender.SendEmail(message);
-            }
+            }*/
 
             _context.Events.Remove(e);
             await _context.SaveChangesAsync();

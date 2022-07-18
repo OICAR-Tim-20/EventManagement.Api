@@ -94,11 +94,16 @@ namespace EventManagement.Controllers
 
         // PUT: api/Ticket/Purchase/5/example@gmail.com
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("Purchase/{id}/{email}")]
-        public async Task<IActionResult> UpdateTicketToPurchased(int id, string email)
+        [HttpPut("Purchase/{id}/{ticketType}/{email}")]
+        public async Task<IActionResult> UpdateTicketToPurchased(int id, string ticketType, string email)
         {
+            if (!Enum.TryParse(ticketType, out TicketType tt))
+            {
+                return BadRequest("Invalid ticket type specified!");
+            }
+
             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-            Ticket t = tickets.FirstOrDefault(t => t.Purchased == false && t.EventId == id);
+            Ticket t = tickets.FirstOrDefault(t => t.Purchased == false && t.EventId == id && t.TicketType == (int)tt);
 
             if (t == null)
             {
@@ -111,7 +116,17 @@ namespace EventManagement.Controllers
             /*var message = new Message(new string[] { email }, "Your ticket", $"You have purchased a ticket for \"{e.Title}\" starting at {e.StartDate}.");
             _emailSender.SendEmail(message);*/
 
-            CreateContact(email, t);
+            List<Contact> contacts = await _context.Contacts.ToListAsync();
+            Contact c = contacts.FirstOrDefault(c => c.Email == email);
+            if (c == null)
+            {
+                CreateContact(email, t);
+            }
+            else
+            {
+                t.ContactId = c.ContactId;
+            }
+
             t.Purchased = true;
 
             try

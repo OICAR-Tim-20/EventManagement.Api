@@ -21,6 +21,9 @@ namespace EventManagement.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Vraća sve lokacije.
+        /// </summary>
         // GET: api/Location
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Location>>> GetLocations()
@@ -29,6 +32,9 @@ namespace EventManagement.Controllers
             return Ok(locations);
         }
 
+        /// <summary>
+        /// Vraća specifičnu lokaciju po id-u.
+        /// </summary>
         // GET: api/Location/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Location>> GetLocation(int id)
@@ -44,6 +50,9 @@ namespace EventManagement.Controllers
             return l;
         }
 
+        /// <summary>
+        /// Ažurira specifičnu lokaciju po id-u.
+        /// </summary>
         // PUT: api/Location/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -76,6 +85,9 @@ namespace EventManagement.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Objavljuje lokaciju.
+        /// </summary>
         // POST: api/Location
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -98,6 +110,9 @@ namespace EventManagement.Controllers
             return Ok("Location Created!");
         }
 
+        /// <summary>
+        /// Briše specifičnu lokaciju po id-u.
+        /// </summary>
         // DELETE: api/Location/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocation(int id)

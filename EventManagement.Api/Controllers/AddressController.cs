@@ -21,6 +21,9 @@ namespace EventManagement.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Vraća sve adrese.
+        /// </summary>
         // GET: api/Address
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
@@ -29,6 +32,9 @@ namespace EventManagement.Controllers
             return Ok(addresses);
         }
 
+        /// <summary>
+        /// Vraća specifičnu adresu po id-u.
+        /// </summary>
         // GET: api/Address/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Address>> GetAddress(int id)
@@ -43,6 +49,9 @@ namespace EventManagement.Controllers
             return a;
         }
 
+        /// <summary>
+        /// Ažurira specifičnu adresu po id-u.
+        /// </summary>
         // PUT: api/Address/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -76,6 +85,9 @@ namespace EventManagement.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Objavljuje adresu.
+        /// </summary>
         // POST: api/Address
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -91,6 +103,9 @@ namespace EventManagement.Controllers
                 address);
         }
 
+        /// <summary>
+        /// Briše specifičnu adresu po id-u.
+        /// </summary>
         // DELETE: api/Address/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAddress(int id)

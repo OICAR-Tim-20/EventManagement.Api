@@ -21,6 +21,9 @@ namespace EventManagement.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Vraća sve komentare.
+        /// </summary>
         // GET: api/Comment
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Comment>>> GetComments()
@@ -29,6 +32,9 @@ namespace EventManagement.Controllers
             return Ok(comments);
         }
 
+        /// <summary>
+        /// Vraća specifične komentare po id-u događaja.
+        /// </summary>
         // GET: api/Comment/ByEvent/5
         [HttpGet("ByEvent/{id}")]
         public async Task<ActionResult<IEnumerable<Comment>>> GetComments(int id)
@@ -37,6 +43,9 @@ namespace EventManagement.Controllers
             return Ok(comments);
         }
 
+        /// <summary>
+        /// Vraća specifični komentar po id-u.
+        /// </summary>
         // GET: api/Comment/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Comment>> GetComment(int id)
@@ -51,6 +60,9 @@ namespace EventManagement.Controllers
             return c;
         }
 
+        /// <summary>
+        /// Ažurira specifični komentar po id-u.
+        /// </summary>
         // PUT: api/Comment/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -85,6 +97,9 @@ namespace EventManagement.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Objavljuje komentar.
+        /// </summary>
         // POST: api/Comment
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -100,6 +115,9 @@ namespace EventManagement.Controllers
                 comment);
         }
 
+        /// <summary>
+        /// Briše specifični komentar po id-u.
+        /// </summary>
         // DELETE: api/Comment/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)

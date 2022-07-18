@@ -20,6 +20,9 @@ namespace EventManagement.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Vraća količine svake vrste događaja po godini.
+        /// </summary>
         // GET: api/Statistics/EventTypesByYear
         [HttpGet("EventTypesByYear")]
         public async Task<ActionResult<EventTypesByYear[]>> GetEventTypesByYear()
@@ -50,6 +53,9 @@ namespace EventManagement.Controllers
             return Ok(orderedEnumerable.ToArray());
         }
 
+        /// <summary>
+        /// Vraća prosječne ocjene događaja.
+        /// </summary>
         // GET: api/Statistics/AverageRatingsByEvent
         [HttpGet("AverageRatingsByEvent")]
         public async Task<ActionResult<KeyValuePair<string, double>[]>> GetAverageRatingsByEvent()
@@ -78,6 +84,9 @@ namespace EventManagement.Controllers
             return Ok(averageRatingsByEvent.ToArray());
         }
 
+        /// <summary>
+        /// Vraća najbolje ocijenjene događaje.
+        /// </summary>
         // GET: api/Statistics/TopRatedEvents/5
         [HttpGet("TopRatedEvents/{amount}")]
         public async Task<ActionResult<KeyValuePair<string, double>[]>> GetTopRatedEvents(int amount)
@@ -108,6 +117,9 @@ namespace EventManagement.Controllers
             return Ok(orderedEnumerable.Take(amount).ToArray());
         }
 
+        /// <summary>
+        /// Vraća najkomentiranije događaje.
+        /// </summary>
         // GET: api/Statistics/MostCommentedEvents/5
         [HttpGet("MostCommentedEvents/{amount}")]
         public async Task<ActionResult<KeyValuePair<string, int>[]>> GetMostCommentedEvents(int amount)
@@ -138,6 +150,9 @@ namespace EventManagement.Controllers
             return Ok(orderedEnumerable.Take(amount).ToArray());
         }
 
+        /// <summary>
+        /// Vraća događaje s najviše prodanih ulaznica.
+        /// </summary>
         // GET: api/Statistics/BestSellingEvents/5
         [HttpGet("BestSellingEvents/{amount}")]
         public async Task<ActionResult<KeyValuePair<string, int>[]>> GetBestSellingEvents(int amount)
@@ -168,6 +183,9 @@ namespace EventManagement.Controllers
             return Ok(orderedEnumerable.Take(amount).ToArray());
         }
 
+        /// <summary>
+        /// Vraća udio prodanih ulaznica za svaku vrstu događaja.
+        /// </summary>
         [HttpGet("PercentageOfTicketsSoldByEventType")]
         public async Task<ActionResult<KeyValuePair<string, double>[]>> PercentageOfTicketsSoldByEventType()
         {
@@ -208,6 +226,9 @@ namespace EventManagement.Controllers
             return Ok(percentageSoldByEventType.ToArray());
         }
 
+        /// <summary>
+        /// Vraća korisnike s najviše kreiranih događaja.
+        /// </summary>
         // GET: api/Statistics/UsersWithMostEvents/5
         [HttpGet("UsersWithMostEvents/{amount}")]
         public async Task<ActionResult<KeyValuePair<string, int>[]>> GetUsersWithMostEvents(int amount)
@@ -238,6 +259,9 @@ namespace EventManagement.Controllers
             return Ok(orderedEnumerable.Take(amount).ToArray());
         }
 
+        /// <summary>
+        /// Vraća korisnike s najviše prodanih ulaznica.
+        /// </summary>
         // GET: api/Statistics/UsersWithMostTicketsSold/5
         [HttpGet("UsersWithMostTicketsSold/{amount}")]
         public async Task<ActionResult<KeyValuePair<string, int>[]>> GetUsersWithMostTicketsSold(int amount)

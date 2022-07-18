@@ -24,6 +24,9 @@ namespace EventManagement.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Vraća sve korisnike.
+        /// </summary>
         // GET: api/User
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
@@ -40,6 +43,9 @@ namespace EventManagement.Controllers
             return Ok(userDTOs);
         }
 
+        /// <summary>
+        /// Vraća specifičnog korisnika po id-u.
+        /// </summary>
         // GET: api/User/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(int id)
@@ -61,7 +67,10 @@ namespace EventManagement.Controllers
             return UserToDTO(u);
         }
 
-        // PUT: api/Event/5
+        /// <summary>
+        /// Ažurira specifičnog korisnika po id-u.
+        /// </summary>
+        // PUT: api/User/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<ActionResult<string>> UpdateUser(int id, UserDTO userDTO)
@@ -108,6 +117,9 @@ namespace EventManagement.Controllers
             return Ok("User profile updated!");
         }
 
+        /// <summary>
+        /// Objavljuje korisnika.
+        /// </summary>
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -144,6 +156,9 @@ namespace EventManagement.Controllers
                 UserToDTO(u));
         }
 
+        /// <summary>
+        /// Briše specifičnog korisnika po id-u.
+        /// </summary>
         // DELETE: api/User/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)

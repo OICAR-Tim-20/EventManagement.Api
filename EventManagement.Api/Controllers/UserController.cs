@@ -91,6 +91,7 @@ namespace EventManagement.Controllers
             u.Picture = userDTO.Picture;
             u.ContactName = userDTO.ContactName;
             u.PhoneNumber = userDTO.PhoneNumber;
+            u.UserType = userDTO.UserType;
 
             GetOrCreateAddress(userDTO, u);
 
@@ -138,7 +139,8 @@ namespace EventManagement.Controllers
                 Email = userDTO.Email,
                 Picture = userDTO.Picture,
                 ContactName = userDTO.ContactName,
-                PhoneNumber = userDTO.PhoneNumber
+                PhoneNumber = userDTO.PhoneNumber,
+                UserType = userDTO.UserType
             };
 
             //u.PasswordHash = Encoding.UTF8.GetBytes(getHash(userDTO.Password));

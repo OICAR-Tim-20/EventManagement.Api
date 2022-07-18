@@ -249,6 +249,7 @@ namespace EventManagement.Controllers
             eventDTO.TicketsAvailable = tickets.Where(t => t.Purchased == false).Count();
             eventDTO.Picture = e.Picture;
             eventDTO.Comments = comments;
+            eventDTO.TicketPrice = tickets.MinBy(t => t.Price).Price;
             return eventDTO;
         }
 

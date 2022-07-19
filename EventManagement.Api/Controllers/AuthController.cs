@@ -29,9 +29,6 @@ namespace EventManagement.Api.Controllers
             return View();
         }
 
-        /// <summary>
-        /// Registrira korisnika.
-        /// </summary>
         [HttpPost("register", Name = "Register")]
         public async Task<ActionResult<User>> Register([FromBody] UserDTO request) {
             //TODO: dovršiti registraciju -> Doraditi DTO objekt, i iz DTO objekta pospremiti sve u User objekt
@@ -53,11 +50,8 @@ namespace EventManagement.Api.Controllers
 
         //TODO: fixati Isusove warninge
 
-        /// <summary>
-        /// Prijavljuje korisnika.
-        /// </summary>
         [HttpPost("login", Name = "Login")]
-        public async Task<ActionResult<string>> Login([FromBody] UserDTO request)
+        public async Task<ActionResult<User>> Login([FromBody] UserDTO request)
         {
             User user = new User();
             //TODO: doraditi login, dodati validaciju, koristeći entity framework dohvatiti usera pomoću username-a ili emaila.
@@ -72,42 +66,36 @@ namespace EventManagement.Api.Controllers
                 return BadRequest("Incorrect password.");
             }
 
-            //ovdje se kreira jwt token i postavlja se u cookie, a response vraća samo poruku.
-            Response.Cookies.Append("jwt", CreateToken(user),new CookieOptions
-            {
-                HttpOnly = true
-            });
+            ////ovdje se kreira jwt token i postavlja se u cookie, a response vraća samo poruku.
+            //Response.Cookies.Append("jwt", CreateToken(user),new CookieOptions
+            //{
+            //    HttpOnly = true
+            //});
 
-            return Ok("Success!");
+            return Ok(user);
         }
 
-        /// <summary>
-        /// Vraća trenutno prijavljenog korisnika.
-        /// </summary>
-        [HttpGet("get_current_user", Name = "GetCurrentUser")]
-        public async Task<ActionResult<User>> GetCurrentUser()
-        {
-            try
-            {
-                var jwt = Request.Cookies["jwt"];
-                var token = VerifyJwt(jwt);
-                string username = token.Claims.First(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name").Value;
-                var user = _context.Users.FirstOrDefault(u => u.Username == username);
-                //var userAddress = _context.Addresses.Find(user.AddressId);
-                //if (userAddress != null) { 
-                //    user.Address = userAddress;
-                //}
-                return Ok(user);
-            }
-            catch (Exception)
-            {
-                return Unauthorized();
-            }
-        }
+        //[HttpGet("get_current_user", Name = "GetCurrentUser")]
+        //public async Task<ActionResult<User>> GetCurrentUser()
+        //{
+        //    try
+        //    {
+        //        var jwt = Request.Cookies["jwt"];
+        //        var token = VerifyJwt(jwt);
+        //        string username = token.Claims.First(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name").Value;
+        //        var user = _context.Users.FirstOrDefault(u => u.Username == username);
+        //        //var userAddress = _context.Addresses.Find(user.AddressId);
+        //        //if (userAddress != null) { 
+        //        //    user.Address = userAddress;
+        //        //}
+        //        return Ok(user);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return Unauthorized();
+        //    }
+        //}
 
-        /// <summary>
-        /// Odjavljuje korisnika.
-        /// </summary>
         [HttpGet("logout")]
         public async Task<ActionResult<string>> Logout() {
             Response.Cookies.Delete("jwt");

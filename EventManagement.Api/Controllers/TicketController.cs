@@ -24,6 +24,9 @@ namespace EventManagement.Controllers
             _emailSender = emailSender;
         }
 
+        /// <summary>
+        /// Vraća sve ulaznice.
+        /// </summary>
         // GET: api/Ticket
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
@@ -32,6 +35,9 @@ namespace EventManagement.Controllers
             return Ok(tickets);
         }
 
+        /// <summary>
+        /// Vraća specifične ulaznice po id-u događaja.
+        /// </summary>
         // GET: api/Ticket/ByEvent/5
         [HttpGet("ByEvent/{id}")]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets(int id)
@@ -40,6 +46,9 @@ namespace EventManagement.Controllers
             return Ok(tickets);
         }
 
+        /// <summary>
+        /// Vraća specifičnu ulaznicu po id-u.
+        /// </summary>
         // GET: api/Ticket/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Ticket>> GetTicket(int id)
@@ -55,6 +64,9 @@ namespace EventManagement.Controllers
             return t;
         }
 
+        /// <summary>
+        /// Ažurira specifičnu ulaznicu po id-u.
+        /// </summary>
         // PUT: api/Ticket/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -92,6 +104,9 @@ namespace EventManagement.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Kupuje specifičnu ulaznicu po id-u za kontakta s e-mail adresom.
+        /// </summary>
         // PUT: api/Ticket/Purchase/5/example@gmail.com
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("Purchase/{id}/{ticketType}/{email}")]
@@ -141,6 +156,9 @@ namespace EventManagement.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Objavljuje ulaznicu.
+        /// </summary>
         // POST: api/Ticket
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -167,6 +185,9 @@ namespace EventManagement.Controllers
                 t);
         }
 
+        /// <summary>
+        /// Briše specifičnu ulaznicu po id-u.
+        /// </summary>
         // DELETE: api/Ticket/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTicket(int id)

@@ -24,6 +24,9 @@ namespace EventManagement.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Vraća sve korisnike.
+        /// </summary>
         // GET: api/User
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
@@ -40,6 +43,9 @@ namespace EventManagement.Controllers
             return Ok(userDTOs);
         }
 
+        /// <summary>
+        /// Vraća specifičnog korisnika po id-u.
+        /// </summary>
         // GET: api/User/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(int id)
@@ -61,7 +67,10 @@ namespace EventManagement.Controllers
             return UserToDTO(u);
         }
 
-        // PUT: api/Event/5
+        /// <summary>
+        /// Ažurira specifičnog korisnika po id-u.
+        /// </summary>
+        // PUT: api/User/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<ActionResult<string>> UpdateUser(int id, UserDTO userDTO)
@@ -82,6 +91,7 @@ namespace EventManagement.Controllers
             u.Picture = userDTO.Picture;
             u.ContactName = userDTO.ContactName;
             u.PhoneNumber = userDTO.PhoneNumber;
+            u.UserType = userDTO.UserType;
 
             GetOrCreateAddress(userDTO, u);
 
@@ -108,6 +118,9 @@ namespace EventManagement.Controllers
             return Ok("User profile updated!");
         }
 
+        /// <summary>
+        /// Objavljuje korisnika.
+        /// </summary>
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -126,7 +139,8 @@ namespace EventManagement.Controllers
                 Email = userDTO.Email,
                 Picture = userDTO.Picture,
                 ContactName = userDTO.ContactName,
-                PhoneNumber = userDTO.PhoneNumber
+                PhoneNumber = userDTO.PhoneNumber,
+                UserType = userDTO.UserType
             };
 
             //u.PasswordHash = Encoding.UTF8.GetBytes(getHash(userDTO.Password));
@@ -144,6 +158,9 @@ namespace EventManagement.Controllers
                 UserToDTO(u));
         }
 
+        /// <summary>
+        /// Briše specifičnog korisnika po id-u.
+        /// </summary>
         // DELETE: api/User/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)

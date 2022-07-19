@@ -29,6 +29,9 @@ namespace EventManagement.Api.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Registrira korisnika.
+        /// </summary>
         [HttpPost("register", Name = "Register")]
         public async Task<ActionResult<User>> Register([FromBody] UserDTO request) {
             //TODO: dovršiti registraciju -> Doraditi DTO objekt, i iz DTO objekta pospremiti sve u User objekt
@@ -50,6 +53,9 @@ namespace EventManagement.Api.Controllers
 
         //TODO: fixati Isusove warninge
 
+        /// <summary>
+        /// Prijavljuje korisnika.
+        /// </summary>
         [HttpPost("login", Name = "Login")]
         public async Task<ActionResult<string>> Login([FromBody] UserDTO request)
         {
@@ -75,6 +81,9 @@ namespace EventManagement.Api.Controllers
             return Ok("Success!");
         }
 
+        /// <summary>
+        /// Vraća trenutno prijavljenog korisnika.
+        /// </summary>
         [HttpGet("get_current_user", Name = "GetCurrentUser")]
         public async Task<ActionResult<User>> GetCurrentUser()
         {
@@ -96,6 +105,9 @@ namespace EventManagement.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Odjavljuje korisnika.
+        /// </summary>
         [HttpGet("logout")]
         public async Task<ActionResult<string>> Logout() {
             Response.Cookies.Delete("jwt");

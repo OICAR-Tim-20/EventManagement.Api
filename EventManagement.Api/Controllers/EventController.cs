@@ -25,6 +25,9 @@ namespace EventManagement.Controllers
             _emailSender = emailSender;
         }
 
+        /// <summary>
+        /// Vraća sve događaje.
+        /// </summary>
         // GET: api/Event
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EventDTO>>> GetEvents()
@@ -34,6 +37,9 @@ namespace EventManagement.Controllers
             return Ok(eventDTOs);
         }
 
+        /// <summary>
+        /// Vraća sve događaje kao EventBlock-ove.
+        /// </summary>
         // GET: api/Event/ByDateAll
         [HttpGet("ByDateAll")]
         public async Task<ActionResult<IEnumerable<EventBlockDTO>>> GetEventsByDateAll()
@@ -57,6 +63,9 @@ namespace EventManagement.Controllers
             return Ok(eventBlockDTOs);
         }
 
+        /// <summary>
+        /// Vraća sve događaje po id-u korisnika.
+        /// </summary>
         // GET: api/Event/ByUser/5
         [HttpGet("ByUser/{id}")]
         public async Task<ActionResult<IEnumerable<EventDTO>>> GetEventsByUser(int id)
@@ -66,6 +75,9 @@ namespace EventManagement.Controllers
             return Ok(eventDTOs);
         }
 
+        /// <summary>
+        /// Vraća sve događaje po datumu.
+        /// </summary>
         // GET: api/Event/ByDate/2001-01-01T09:09:17.490Z
         [HttpGet("ByDate/{date}")]
         public async Task<ActionResult<IEnumerable<EventBlockDTO>>> GetEventsByDate(string date)
@@ -80,6 +92,9 @@ namespace EventManagement.Controllers
             return Ok(eventBlockDTO);
         }
 
+        /// <summary>
+        /// Vraća specifični događaj po id-u.
+        /// </summary>
         // GET: api/Event/5
         [HttpGet("{id}")]
         public async Task<ActionResult<EventDTO>> GetEvent(int id)
@@ -95,6 +110,9 @@ namespace EventManagement.Controllers
             return EventToDTO(e);
         }
 
+        /// <summary>
+        /// Ažurira specifični događaj po id-u.
+        /// </summary>
         // PUT: api/Event/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -145,6 +163,9 @@ namespace EventManagement.Controllers
             return Ok("Event updated!");
         }
 
+        /// <summary>
+        /// Objavljuje događaj.
+        /// </summary>
         // POST: api/Event
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -191,6 +212,9 @@ namespace EventManagement.Controllers
             return Ok("Event created!");
         }
 
+        /// <summary>
+        /// Briše specifični događaj po id-u.
+        /// </summary>
         // DELETE: api/Event/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
